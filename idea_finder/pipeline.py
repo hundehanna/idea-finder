@@ -169,6 +169,15 @@ EXTRACT_TOOL = {
 }
 
 
+def extract_prompt_version() -> str:
+    """Short hash of the extraction model, prompt and tool schema.
+
+    The extraction cache is keyed by this, so changing the prompt never reuses old answers.
+    """
+    text = json.dumps([EXTRACT_MODEL, EXTRACT_SYSTEM, EXTRACT_TOOL], sort_keys=True)
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()[:10]
+
+
 def _extract_batch(batch: list[dict]) -> list[dict]:
     parts = []
     for r in batch:
