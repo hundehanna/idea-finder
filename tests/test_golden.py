@@ -82,12 +82,26 @@ def test_help_matches_golden(monkeypatch, capsys):
     assert out.splitlines() == (GOLDEN / "help.txt").read_text(encoding="utf-8").splitlines()
 
 
-@pytest.mark.xfail(strict=True, reason=(
-    "Known bug: pandas turns a 'timestamp' column in JSONL input into dates, "
-    "then json.dumps fails. CSV input works. Not fixed yet."))
 def test_collect_jsonl_input_with_timestamp(tmp_path):
+    """JSONL input with a 'timestamp' column used to crash (pandas turned it into dates)."""
     path = tmp_path / "in.jsonl"
     row = {"text": "The lid leaks every time it tips over in my bag on the way to work.",
-           "rating": 1, "timestamp": 1588687728923, "product": "B01"}
+           "rating": 1, "timestamp": 1588687728923, "product": "B01", "helpful_vote": 2}
     path.write_text(json.dumps(row) + "\n", encoding="utf-8")
     main(["collect", "--input", str(path), "--workdir", str(tmp_path / "run")])
+    saved = json.loads((tmp_path / "run" / "reviews.jsonl").read_text(encoding="utf-8"))
+    assert saved["timestamp"] == 1588687728923   # still a plain number, as in the CSV path
+    assert saved["product"] == "B01" and saved["helpful_vote"] == 2
+
+
+def test_collect_gives_the_same_reviews_from_jsonl_and_csv(tmp_path):
+    """The fixture CSV, converted to JSONL, collects to exactly the same reviews."""
+    import pandas as pd
+    df = pd.read_csv(INPUT_DIR / "reviews.csv", encoding="utf-8")
+    jsonl = tmp_path / "reviews.jsonl"
+    df.to_json(jsonl, orient="records", lines=True, force_ascii=False)
+    main(["collect", "--input", str(INPUT_DIR / "reviews.csv"), "--workdir", str(tmp_path / "csv")])
+    main(["collect", "--input", str(jsonl), "--workdir", str(tmp_path / "jsonl")])
+    from_csv = (tmp_path / "csv" / "reviews.jsonl").read_text(encoding="utf-8").splitlines()
+    from_jsonl = (tmp_path / "jsonl" / "reviews.jsonl").read_text(encoding="utf-8").splitlines()
+    assert from_jsonl == from_csv

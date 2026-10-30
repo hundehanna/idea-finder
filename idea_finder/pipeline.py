@@ -65,7 +65,9 @@ def stage_collect(args, wd: Path) -> None:
     if args.input:
         path = Path(args.input)
         if path.suffix.lower() in (".jsonl", ".json"):
-            df = pd.read_json(path, lines=path.suffix.lower() == ".jsonl")
+            # convert_dates=False: otherwise pandas turns a 'timestamp' column into dates,
+            # which json.dumps can't write. Keep it a plain number, like the CSV path does.
+            df = pd.read_json(path, lines=path.suffix.lower() == ".jsonl", convert_dates=False)
         else:
             df = pd.read_csv(path, encoding="utf-8-sig")
         if "text" not in df.columns:
