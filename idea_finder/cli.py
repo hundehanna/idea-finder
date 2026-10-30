@@ -41,6 +41,7 @@ import sys
 import time
 from pathlib import Path
 
+from . import llm
 from .config import CATEGORIES, STAGES
 from .pipeline import (stage_cluster, stage_collect, stage_extract, stage_label,
                        stage_report, stage_sample)
@@ -86,6 +87,7 @@ def main(argv=None, prog: str | None = None) -> None:
         name += "_" + re.sub(r"[^a-z0-9]+", "-", args.keyword.lower()).strip("-")
     wd = Path(args.workdir or f"runs/{name}")
     wd.mkdir(parents=True, exist_ok=True)
+    llm.start_run(wd)  # every model call in this run is logged to <wd>/trace.jsonl
 
     needs_llm = {"extract", "label"} & set(stages)
     if needs_llm and not os.environ.get("ANTHROPIC_API_KEY"):

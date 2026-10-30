@@ -173,7 +173,7 @@ def _extract_batch(batch: list[dict]) -> list[dict]:
         parts.append(f"<review id=\"{r['id']}\" rating=\"{stars}\">\n"
                      f"Title: {r.get('title', '')}\n{short(r['text'], 2500)}\n</review>")
     user = "Reviews:\n\n" + "\n\n".join(parts)
-    out = call_tool(EXTRACT_MODEL, EXTRACT_SYSTEM, user, EXTRACT_TOOL)
+    out = call_tool(EXTRACT_MODEL, EXTRACT_SYSTEM, user, EXTRACT_TOOL, purpose="extract")
     valid = {r["id"] for r in batch}
     results, seen = [], set()
     for x in out.get("results", []):
@@ -338,7 +338,7 @@ def _label_one(cid: int, items: list[dict], reviews: dict, seed: int) -> dict:
             f"{len({p['product'] for p in items if p.get('product')}) or 'unknown'} different products.\n\n"
             "Problem statements (sample):\n" + "\n".join(lines) +
             "\n\nOriginal review excerpts:\n" + "\n".join(f'"{q}"' for q in quotes))
-    return call_tool(LABEL_MODEL, LABEL_SYSTEM, user, LABEL_TOOL, max_tokens=2000)
+    return call_tool(LABEL_MODEL, LABEL_SYSTEM, user, LABEL_TOOL, max_tokens=2000, purpose="label")
 
 
 def stage_label(args, wd: Path) -> None:

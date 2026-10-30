@@ -54,13 +54,14 @@ class FakeBadRequest(Exception):
 
 
 def make_message(model: str, content: list[dict], stop_reason: str,
-                 input_tokens: int, output_tokens: int, msg_id: str = "msg_fake") -> Message:
+                 input_tokens: int, output_tokens: int, msg_id: str = "msg_fake",
+                 cache_write: int = 0, cache_read: int = 0) -> Message:
     """Build a real SDK Message object from plain dicts."""
     return Message.model_validate({
         "id": msg_id, "type": "message", "role": "assistant", "model": model,
         "content": content, "stop_reason": stop_reason, "stop_sequence": None,
         "usage": {"input_tokens": input_tokens, "output_tokens": output_tokens,
-                  "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0},
+                  "cache_creation_input_tokens": cache_write, "cache_read_input_tokens": cache_read},
     })
 
 

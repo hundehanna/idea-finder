@@ -25,6 +25,15 @@ def block_real_api(monkeypatch):
     monkeypatch.setenv("COLUMNS", "100")  # fixed width, so --help text is stable
 
 
+@pytest.fixture(autouse=True)
+def fresh_trace_state(monkeypatch):
+    """Each test starts with no run folder set, so traces never leak between tests."""
+    from idea_finder import llm
+    monkeypatch.setattr(llm, "_trace_path", None)
+    monkeypatch.setattr(llm, "_run_id", "")
+    monkeypatch.setattr(llm, "_call_count", 0)
+
+
 @pytest.fixture
 def fake_llm(monkeypatch) -> FakeLLM:
     """Put a FakeLLM where the code keeps its client."""
