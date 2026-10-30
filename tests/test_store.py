@@ -99,6 +99,20 @@ def test_search_handles_non_ascii(db):
     assert hits and all(h["title"] == "Déçu" for h in hits)
 
 
+def test_snippet_of_a_long_review_is_clean_text(tmp_path):
+    """A match in the middle of a long review gives a cut snippet with a plain '...' marker."""
+    filler = " ".join(f"word{i}" for i in range(80))
+    text = f"{filler} the mug does not fit my cup holder at all {filler}"
+    for use_fts in (True, False):
+        conn = store.connect(tmp_path / f"long_{use_fts}.db", use_fts=use_fts)
+        store.add_reviews(conn, [{"id": "TES-1", "category": "Test", "rating": 1.0, "title": "",
+                                  "text": text}])
+        snippet = store.search_reviews(conn, "cup holder")[0]["snippet"]
+        assert "�" not in snippet
+        assert snippet.startswith("...") and snippet.endswith("...")
+        assert len(snippet) < len(text) / 2
+
+
 def test_search_is_fast(db):
     start = time.perf_counter()
     for _ in range(20):

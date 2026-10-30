@@ -188,7 +188,8 @@ def _like_snippet(text: str, words: list[str], width: int = 80) -> str:
         return text[: 2 * width]
     start = max(0, min(hits) - width)
     piece = text[start: min(hits) + width]
-    return ("…" if start > 0 else "") + piece + ("…" if start + len(piece) < len(text) else "")
+    # A plain "..." marks cut text. (A Unicode "…" passed to FTS5's snippet() came back broken.)
+    return ("..." if start > 0 else "") + piece + ("..." if start + len(piece) < len(text) else "")
 
 
 def search_reviews(conn: sqlite3.Connection, query: str, category: str | None = None,
@@ -200,7 +201,7 @@ def search_reviews(conn: sqlite3.Connection, query: str, category: str | None = 
     if fts_enabled(conn):
         rows = conn.execute("""
             SELECT r.id, r.category, r.product, r.rating, r.title,
-                   snippet(reviews_fts, -1, '[', ']', '…', 24) AS snippet
+                   snippet(reviews_fts, -1, '[', ']', '...', 24) AS snippet
             FROM reviews_fts JOIN reviews r ON r.rowid = reviews_fts.rowid
             WHERE reviews_fts MATCH ?
               AND (? IS NULL OR r.category = ?)
