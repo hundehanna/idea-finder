@@ -154,14 +154,17 @@ EXTRACT_TOOL = {
                                     "wish": {"type": "string"},
                                 },
                                 "required": ["problem", "context", "who", "workaround", "wish"],
+                                "additionalProperties": False,
                             },
                         },
                     },
                     "required": ["review_id", "noise", "problems"],
+                    "additionalProperties": False,
                 },
             }
         },
         "required": ["results"],
+        "additionalProperties": False,
     },
 }
 
@@ -322,6 +325,7 @@ LABEL_TOOL = {
         },
         "required": ["name", "underlying_need", "who_and_when", "current_workarounds",
                      "why_products_fail", "product_directions", "opportunity_type"],
+        "additionalProperties": False,
     },
 }
 

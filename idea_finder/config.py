@@ -18,6 +18,10 @@ LABEL_MODEL = os.environ.get("LABEL_MODEL", "claude-sonnet-5-5")
 AGENT_MODEL = os.environ.get("AGENT_MODEL", "claude-sonnet-5-5")
 CRITIC_MODEL = os.environ.get("CRITIC_MODEL", "claude-opus-5-5")
 
+# Models that accept a forced tool_choice ({"type": "tool", ...}).
+# Claude Sonnet 5.5 and Opus 5.5 return a 400 error for it (tool-use docs, checked 2026-10-29).
+FORCED_TOOL_CHOICE_MODELS = {"claude-haiku-5-5"}
+
 # Most one agent run may spend, in US dollars.
 MAX_COST_PER_RUN = float(os.environ.get("MAX_COST_PER_RUN", "2.00"))
 

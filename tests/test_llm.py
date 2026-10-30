@@ -8,7 +8,7 @@ from types import SimpleNamespace
 import pytest
 
 from fake_llm import FakeBadRequest, FakeLLM, make_message
-from idea_finder import llm
+from idea_finder import llm, pipeline
 from test_golden import run_pipeline
 
 TRACE_FIELDS = {"call_id", "ts", "run_id", "purpose", "model", "request_hash", "input_tokens",
@@ -105,6 +105,52 @@ def test_trace_totals_and_rerun_numbering(tmp_path, monkeypatch):
     assert totals["calls"] == 3 and totals["errors"] == 0
     assert totals["input_tokens"] == 3000 and totals["output_tokens"] == 1500
     assert totals["cost_usd"] == pytest.approx(3 * (1000 * 2 + 500 * 10) / 1e6)
+
+
+TOOL = {"name": "describe_cluster", "description": "d",
+        "input_schema": {"type": "object", "properties": {"name": {"type": "string"}},
+                         "required": ["name"], "additionalProperties": False}}
+
+
+def test_call_tool_forces_the_tool_on_haiku(fake_llm):
+    llm.call_tool("claude-haiku-5-5", "system text", "- Light flickers", TOOL)
+    sent = fake_llm.requests[0]
+    assert sent["tool_choice"] == {"type": "tool", "name": "describe_cluster"}
+    assert sent["system"] == "system text"
+    assert "strict" not in sent["tools"][0]
+
+
+def test_call_tool_asks_in_words_on_sonnet(fake_llm):
+    out = llm.call_tool("claude-sonnet-5-5", "system text", "- Light flickers", TOOL)
+    sent = fake_llm.requests[0]
+    assert sent["tool_choice"] == {"type": "auto"}
+    assert sent["tools"][0]["strict"] is True
+    assert sent["system"].endswith("Answer only by calling the describe_cluster tool.")
+    assert out["name"] == "Light flickers"
+    assert "strict" not in TOOL  # the caller's tool dict is not changed
+
+
+def test_call_tool_raises_when_model_answers_in_text(monkeypatch):
+    monkeypatch.setattr(llm, "_client", FakeLLM(script=[reply()]))
+    with pytest.raises(RuntimeError, match="stop_reason=end_turn"):
+        llm.call_tool("claude-sonnet-5-5", "s", "u", TOOL)
+
+
+def _objects(schema: dict):
+    """Every object schema inside a JSON schema."""
+    if schema.get("type") == "object":
+        yield schema
+    for value in schema.get("properties", {}).values():
+        yield from _objects(value)
+    if "items" in schema:
+        yield from _objects(schema["items"])
+
+
+@pytest.mark.parametrize("tool", [pipeline.EXTRACT_TOOL, pipeline.LABEL_TOOL], ids=lambda t: t["name"])
+def test_pipeline_tools_are_ready_for_strict_mode(tool):
+    for obj in _objects(tool["input_schema"]):
+        assert obj["additionalProperties"] is False
+        assert set(obj["required"]) == set(obj["properties"])
 
 
 def test_pipeline_run_writes_a_trace(tmp_path, monkeypatch, fake_llm, sync_pool):

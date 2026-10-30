@@ -122,11 +122,15 @@ class _Messages:
         return self._owner._create(kwargs)
 
 
+# Like the real API (checked 2026-10-29): these models return a 400 for a forced tool_choice.
+REJECTS_FORCED_TOOL_CHOICE = ("claude-sonnet-5-5", "claude-opus-5-5")
+
+
 class FakeLLM:
     """Stand-in for anthropic.Anthropic()."""
 
     def __init__(self, script: Iterable[Message | Callable[[dict], Message]] | None = None,
-                 reject_forced_tool_choice_for: Iterable[str] = ()) -> None:
+                 reject_forced_tool_choice_for: Iterable[str] = REJECTS_FORCED_TOOL_CHOICE) -> None:
         self.messages = _Messages(self)
         self.requests: list[dict] = []
         self._script = list(script or [])

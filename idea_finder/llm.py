@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from .config import LONG_PROMPT_TOKENS, PRICES
+from .config import FORCED_TOOL_CHOICE_MODELS, LONG_PROMPT_TOKENS, PRICES
 from .utils import log
 
 _client = None
@@ -144,6 +144,14 @@ def trace_totals(path: Path) -> dict:
 def call_tool(model: str, system: str, user: str, tool: dict, max_tokens: int = 4096,
               purpose: str = "tool") -> dict:
     """Ask the model to answer by calling `tool`; return the tool input as a dict."""
+    if model in FORCED_TOOL_CHOICE_MODELS:
+        tool_choice = {"type": "tool", "name": tool["name"]}
+    else:
+        # This model rejects a forced tool_choice. So we ask for the tool in words,
+        # and strict mode makes sure the tool input matches the schema.
+        tool_choice = {"type": "auto"}
+        tool = {**tool, "strict": True}
+        system = f"{system}\n\nAnswer only by calling the {tool['name']} tool."
     resp = call(
         purpose=purpose,
         model=model,
@@ -151,7 +159,7 @@ def call_tool(model: str, system: str, user: str, tool: dict, max_tokens: int = 
         system=system,
         messages=[{"role": "user", "content": user}],
         tools=[tool],
-        tool_choice={"type": "tool", "name": tool["name"]},
+        tool_choice=tool_choice,
     )
     for block in resp.content:
         if block.type == "tool_use":
