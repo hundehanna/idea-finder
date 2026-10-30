@@ -140,6 +140,18 @@ def add_reviews(conn: sqlite3.Connection, rows: list[dict]) -> int:
     return added
 
 
+def delete_category(conn: sqlite3.Connection, category: str) -> int:
+    """Remove one category's reviews (used by 'prepare --force'). Returns how many were removed.
+
+    Cached extractions are kept: review IDs are stable, so they still match after a rebuild.
+    """
+    with conn:
+        if fts_enabled(conn):
+            conn.execute("DELETE FROM reviews_fts WHERE rowid IN "
+                         "(SELECT rowid FROM reviews WHERE category = ?)", (category,))
+        return conn.execute("DELETE FROM reviews WHERE category = ?", (category,)).rowcount
+
+
 def category_counts(conn: sqlite3.Connection) -> list[dict]:
     """Reviews per category, with product count and average rating."""
     rows = conn.execute("""

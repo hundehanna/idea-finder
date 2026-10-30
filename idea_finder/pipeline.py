@@ -10,6 +10,7 @@ import json
 import os
 import random
 import sys
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
@@ -17,6 +18,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from . import store
 from .config import CATEGORIES, EXTRACT_MODEL, HF_PATH, HF_REPO, LABEL_MODEL
 from .llm import call_tool
 from .utils import blank, clean_text, log, read_jsonl, require, short, write_jsonl
@@ -25,20 +27,39 @@ from .utils import blank, clean_text, log, read_jsonl, require, short, write_jso
 # Stage 1: collect
 # ---------------------------------------------------------------------------
 
+def keep_review(text: str, title: str, rating, min_chars: int, max_rating: float,
+                keywords: list[str]) -> bool:
+    """True if a review is long enough, low-rated enough, and mentions a keyword (if any are given)."""
+    if len(text) < min_chars:
+        return False
+    if rating is not None and rating > max_rating:
+        return False
+    if keywords:
+        hay = f"{title} {text}".lower()
+        return any(k in hay for k in keywords)
+    return True
+
+
+def reservoir_add(sample: list, item, seen: int, n: int, rng: random.Random) -> None:
+    """Reservoir sampling: keep a fair random sample of n items from a stream of unknown length.
+
+    `seen` is how many items have come in so far, this one included.
+    """
+    if len(sample) < n:
+        sample.append(item)
+    else:
+        j = rng.randrange(seen)
+        if j < n:
+            sample[j] = item
+
+
 def stage_collect(args, wd: Path) -> None:
     out = wd / "reviews.jsonl"
     keywords = [k.strip().lower() for k in (args.keyword or "").split(",") if k.strip()]
     rng = random.Random(args.seed)
 
     def keep(text: str, title: str, rating) -> bool:
-        if len(text) < args.min_chars:
-            return False
-        if rating is not None and rating > args.max_rating:
-            return False
-        if keywords:
-            hay = f"{title} {text}".lower()
-            return any(k in hay for k in keywords)
-        return True
+        return keep_review(text, title, rating, args.min_chars, args.max_rating, keywords)
 
     rows: list[dict] = []
     if args.input:
@@ -92,12 +113,7 @@ def stage_collect(args, wd: Path) -> None:
                     "helpful_vote": r.get("helpful_vote", 0) or 0,
                 }
                 seen += 1
-                if len(rows) < args.n:
-                    rows.append(row)
-                else:
-                    j = rng.randrange(seen)
-                    if j < args.n:
-                        rows[j] = row
+                reservoir_add(rows, row, seen, args.n, rng)
         source = f"Amazon Reviews 2023 / {args.category}"
 
     for i, r in enumerate(rows):
@@ -109,6 +125,73 @@ def stage_collect(args, wd: Path) -> None:
     log(f"Saved {len(rows)} reviews to {out}")
     if len(rows) < 50:
         log("Warning: fewer than 50 reviews. Widen the keyword, raise --scan, or pick another category.")
+
+
+# ---------------------------------------------------------------------------
+# Prepare: fill the local review store once, so agent tools are fast and free
+# ---------------------------------------------------------------------------
+
+def open_review_file(category: str, source_dir: Path | None):
+    """Open a category's raw review file: a local copy if source_dir is set, else stream from Hugging Face."""
+    if source_dir is not None:
+        path = Path(source_dir) / f"{category}.jsonl"
+        if not path.exists():
+            sys.exit(f"Missing {path}")
+        return path.open(encoding="utf-8")
+    from huggingface_hub import HfFileSystem
+    return HfFileSystem().open(HF_PATH.format(repo=HF_REPO, category=category), "r", encoding="utf-8")
+
+
+def store_row(category: str, r: dict, title: str, text: str) -> dict:
+    """One raw Amazon review, in the store's format."""
+    return {
+        "id": store.review_id(category, r.get("user_id"), r.get("asin"), r.get("timestamp")),
+        "category": category, "product": r.get("parent_asin") or r.get("asin") or "",
+        "rating": r.get("rating"), "title": title, "text": text,
+        "timestamp": r.get("timestamp"), "helpful_vote": r.get("helpful_vote", 0) or 0,
+    }
+
+
+def prepare_category(conn, category: str, per_category: int, scan: int, max_rating: float,
+                     min_chars: int, seed: int, source_dir: Path | None = None,
+                     replace: bool = False) -> dict:
+    """Sample up to `per_category` low-star reviews from the first `scan` lines into the store.
+
+    With replace=True the category's old reviews are removed, but only after the new sample
+    is ready, so a failed download never leaves the category empty.
+    """
+    rng = random.Random(seed)
+    sample: list[dict] = []
+    seen = lines = 0
+    start = time.time()
+    where = "a local file" if source_dir else "Hugging Face"
+    limit = f"up to {scan:,} lines" if scan else "the whole file"
+    log(f"{category}: reading {limit} from {where}")
+    with open_review_file(category, source_dir) as f:
+        for line in f:
+            if scan and lines >= scan:
+                break
+            lines += 1
+            if lines % 50_000 == 0:
+                rate = lines / max(time.time() - start, 1e-9)
+                left = f", about {(scan - lines) / rate:.0f}s left" if scan else ""
+                log(f"  {lines:,} lines, {seen:,} matching, {rate:,.0f} lines/s{left}")
+            r = json.loads(line)
+            text, title = clean_text(r.get("text")), clean_text(r.get("title"))
+            if not keep_review(text, title, r.get("rating"), min_chars, max_rating, []):
+                continue
+            seen += 1
+            reservoir_add(sample, store_row(category, r, title, text), seen, per_category, rng)
+    if replace:
+        store.delete_category(conn, category)
+    added = store.add_reviews(conn, sample)
+    info = {"lines_scanned": lines, "matching": seen, "kept": len(sample), "added": added,
+            "seconds": round(time.time() - start, 1), "per_category": per_category, "scan": scan,
+            "max_rating": max_rating, "min_chars": min_chars, "seed": seed,
+            "prepared_at": datetime.now().isoformat(timespec="seconds")}
+    store.set_meta(conn, f"prepare:{category}", json.dumps(info))
+    log(f"{category}: {lines:,} lines, {seen:,} matching, kept {len(sample):,} in {info['seconds']}s")
+    return info
 
 
 # ---------------------------------------------------------------------------

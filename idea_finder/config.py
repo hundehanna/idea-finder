@@ -13,6 +13,10 @@ from dotenv import load_dotenv
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 load_dotenv(PROJECT_ROOT / ".env")  # never overrides variables that are already set
 
+# The local review database built by 'prepare' (data/ is in .gitignore).
+DB_PATH = Path(os.environ.get("IDEAS_DB", PROJECT_ROOT / "data" / "ideas.db"))
+PREPARE_CATEGORIES = ["Baby_Products", "Home_and_Kitchen", "Sports_and_Outdoors"]
+
 EXTRACT_MODEL = os.environ.get("EXTRACT_MODEL", "claude-haiku-5-5")
 LABEL_MODEL = os.environ.get("LABEL_MODEL", "claude-sonnet-5-5")
 AGENT_MODEL = os.environ.get("AGENT_MODEL", "claude-sonnet-5-5")
