@@ -16,6 +16,12 @@ Then put the API key in `.env`. Never print the key or commit `.env`.
 ## Run
 
 ```
+python -m idea_finder prepare
+```
+
+Builds the local review database `data/ideas.db`: up to 5,000 low-star reviews each for Baby_Products, Home_and_Kitchen and Sports_and_Outdoors, with FTS5 keyword search. It takes about 3 minutes, needs no API key and costs nothing. Run it once; it skips categories that are already there (`--force` rebuilds them).
+
+```
 python idea_finder.py all --category Baby_Products --keyword "diaper bag" --n 200 --scan 300000
 python -m idea_finder all --category Baby_Products --keyword "diaper bag" --n 200 --scan 300000
 ```
@@ -36,7 +42,8 @@ To rebuild the synthetic reviews: `python tests/fixtures/make_fixtures.py`.
 
 - `idea_finder/config.py`: models, prices, budgets, paths. Values can come from `.env`.
 - `idea_finder/llm.py`: the only place that calls the model. Logs every call to `<run folder>/trace.jsonl`.
-- `idea_finder/pipeline.py`: the six stages and their prompts.
+- `idea_finder/pipeline.py`: the six stages and their prompts, plus `prepare_category`.
+- `idea_finder/store.py`: SQLite: reviews with FTS5 search, the extraction cache (by review ID and prompt version), problem embeddings.
 - `idea_finder/cli.py`: command-line commands. `idea_finder.py` is a thin wrapper kept for old commands.
 - `idea_finder/utils.py`: small shared helpers.
 - `tests/`: fake model, synthetic fixtures, golden files.
