@@ -17,7 +17,7 @@ from pathlib import Path
 
 import pytest
 
-import idea_finder
+from idea_finder.cli import main
 
 TESTS = Path(__file__).parent
 INPUT_DIR = TESTS / "fixtures" / "input"
@@ -44,9 +44,9 @@ def normalize(name: str, text: str) -> list[str]:
 def run_pipeline(workdir: Path, monkeypatch) -> None:
     """Run all stages on the fixture CSV, the same way a user would."""
     monkeypatch.chdir(INPUT_DIR)  # so the recorded source is just "reviews.csv"
-    idea_finder.main(["all", "--input", "reviews.csv", "--workdir", str(workdir),
-                      "--embedder", "tfidf", "--workers", "1"])
-    idea_finder.main(["sample", "--workdir", str(workdir), "--eval-n", "10"])
+    main(["all", "--input", "reviews.csv", "--workdir", str(workdir),
+          "--embedder", "tfidf", "--workers", "1"])
+    main(["sample", "--workdir", str(workdir), "--eval-n", "10"])
 
 
 def test_pipeline_output_matches_golden(tmp_path, monkeypatch, fake_llm, sync_pool):
@@ -75,7 +75,7 @@ def test_pipeline_made_real_clusters(tmp_path, monkeypatch, fake_llm, sync_pool)
 def test_help_matches_golden(monkeypatch, capsys):
     monkeypatch.setattr(sys, "argv", ["idea_finder.py"])
     with pytest.raises(SystemExit):
-        idea_finder.main(["--help"])
+        main(["--help"])
     out = capsys.readouterr().out
     if UPDATE:
         (GOLDEN / "help.txt").write_text(out, encoding="utf-8")
@@ -90,4 +90,4 @@ def test_collect_jsonl_input_with_timestamp(tmp_path):
     row = {"text": "The lid leaks every time it tips over in my bag on the way to work.",
            "rating": 1, "timestamp": 1588687728923, "product": "B01"}
     path.write_text(json.dumps(row) + "\n", encoding="utf-8")
-    idea_finder.main(["collect", "--input", str(path), "--workdir", str(tmp_path / "run")])
+    main(["collect", "--input", str(path), "--workdir", str(tmp_path / "run")])

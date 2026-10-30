@@ -10,9 +10,9 @@ import pytest
 
 from fake_llm import FakeLLM
 
-# Where the code under test lives. These move when the script becomes a package.
-STAGES_MODULE = "idea_finder"   # has ThreadPoolExecutor / as_completed
-CLIENT_MODULE = "idea_finder"   # has the cached _client
+# Where the code under test lives.
+STAGES_MODULE = "idea_finder.pipeline"   # has ThreadPoolExecutor / as_completed
+CLIENT_MODULE = "idea_finder.llm"        # has the cached _client
 
 
 @pytest.fixture(autouse=True)
