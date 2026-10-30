@@ -1,0 +1,7 @@
+runs/
+data/
+private/
+__pycache__/
+*.pyc
+.env
+.venv/

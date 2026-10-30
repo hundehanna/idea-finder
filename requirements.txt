@@ -1,0 +1,6 @@
+anthropic
+numpy
+pandas
+scikit-learn>=1.2
+huggingface_hub
+sentence-transformers
