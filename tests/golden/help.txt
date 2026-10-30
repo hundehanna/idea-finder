@@ -1,0 +1,83 @@
+usage: idea_finder.py [-h] [--workdir WORKDIR] [--category CATEGORY] [--input INPUT]
+                      [--keyword KEYWORD] [--n N] [--max-rating MAX_RATING]
+                      [--min-chars MIN_CHARS] [--scan SCAN] [--batch BATCH] [--workers WORKERS]
+                      [--limit LIMIT] [--max-clusters MAX_CLUSTERS] [--embedder {auto,st,tfidf}]
+                      [--threshold THRESHOLD] [--min-size MIN_SIZE] [--eval-n EVAL_N]
+                      [--seed SEED]
+                      {collect,extract,cluster,label,report,sample,all}
+                      [{collect,extract,cluster,label,report,sample,all} ...]
+
+Idea Finder: turn bad product reviews into a ranked list of unmet customer needs.
+
+Pipeline (each stage saves its output in --workdir, so you can re-run any step):
+  1. collect   Pull 1-3 star reviews for a category (Amazon Reviews 2023 dataset),
+               or load your own CSV/JSONL of reviews or comments.
+  2. extract   An LLM reads each review and pulls out the real problem(s),
+               skipping shipping/seller/price noise.
+  3. cluster   Embed the problem statements and group similar ones.
+  4. label     An LLM names each group, explains the underlying need and
+               suggests product directions.
+  5. report    Score and rank the groups, write report.md and clusters.csv.
+  6. sample    Write a random sample of extractions to a CSV you grade by hand
+               (your eval set for the extraction step).
+
+Setup:
+  pip install anthropic numpy pandas scikit-learn huggingface_hub
+  pip install sentence-transformers     # optional: better embeddings (else TF-IDF)
+  export ANTHROPIC_API_KEY=sk-...
+
+Examples:
+  # small test run first (cheap), then scale up
+  python idea_finder.py all --category Baby_Products --keyword "diaper bag" --n 200
+  python idea_finder.py all --category Home_and_Kitchen --keyword lunch --n 2000
+
+  # your own data: CSV/JSONL with a "text" column (optional: rating, title,
+  # product, timestamp, helpful_vote)
+  python idea_finder.py all --input my_reviews.csv --workdir runs/my_data
+
+  # re-run only the later steps after tweaking settings
+  python idea_finder.py cluster --workdir runs/baby --threshold 0.5
+  python idea_finder.py label report --workdir runs/baby
+
+positional arguments:
+  {collect,extract,cluster,label,report,sample,all}
+                        Which stage(s) to run. 'all' = collect extract cluster label report
+
+options:
+  -h, --help            show this help message and exit
+  --workdir WORKDIR     Folder for this run (default: runs/<category or input name>)
+
+collect:
+  --category CATEGORY   Amazon category, e.g. Baby_Products. Known: All_Beauty, Amazon_Fashion,
+                        Appliances, Arts_Crafts_and_Sewing, Automotive, Baby_Products,
+                        Beauty_and_Personal_Care, Books, Cell_Phones_and_Accessories,
+                        Clothing_Shoes_and_Jewelry, Electronics, Grocery_and_Gourmet_Food,
+                        Handmade_Products, Health_and_Household, Home_and_Kitchen,
+                        Industrial_and_Scientific, Office_Products, Patio_Lawn_and_Garden,
+                        Pet_Supplies, Sports_and_Outdoors, Tools_and_Home_Improvement,
+                        Toys_and_Games, Video_Games
+  --input INPUT         Your own CSV/JSONL with a 'text' column instead of Amazon data
+  --keyword KEYWORD     Only keep reviews mentioning any of these (comma-separated)
+  --n N                 How many reviews to keep (default 1000)
+  --max-rating MAX_RATING
+                        Keep reviews at or below this rating (default 3)
+  --min-chars MIN_CHARS
+                        Skip reviews shorter than this
+  --scan SCAN           Max lines to scan from the Amazon file (0 = whole file; default 1,000,000)
+
+extract / label:
+  --batch BATCH         Reviews per extraction call (default 10)
+  --workers WORKERS     Parallel API calls (default 4)
+  --limit LIMIT         Only extract the first N reviews (test runs)
+  --max-clusters MAX_CLUSTERS
+                        Label at most this many clusters
+
+cluster:
+  --embedder {auto,st,tfidf}
+  --threshold THRESHOLD
+                        Cosine distance cutoff (default 0.45 sentence-transformers, 0.75 TF-IDF)
+  --min-size MIN_SIZE   Smallest group to keep (default 5)
+
+other:
+  --eval-n EVAL_N       Rows in eval_sample.csv
+  --seed SEED

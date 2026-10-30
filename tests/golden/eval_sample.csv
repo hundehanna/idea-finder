@@ -1,0 +1,14 @@
+﻿review_id,rating,review_text,noise,extracted_problems,all_correct (y/n),made_up_problem (y/n),missed_problem,notes
+81,1.0,"Bought it as a birthday present. The plastic legs broke after a week. Also, it is so loud we cannot use it at bedtime.",False,"- Arms and legs snap off easily
+- Robot is too loud for quiet times",,,,
+14,2.0,I use it every morning on the train. Even after washing it has a smell of old coffee.,False,- Mug keeps a smell after washing,,,,
+3,2.0,"I got it for my home office. The head gets too hot to touch after an hour. Also, it is too dim to read at night.",False,"- Lamp head gets too hot
+- Light is not bright enough for work",,,,
+94,2.0,"I bought this for my daily commute. Even after washing it has a smell of old coffee. Also, it is not dishwasher safe so I hand wash it every single day.",False,"- Mug keeps a smell after washing
+- Mug is not dishwasher safe",,,,
+35,1.0,I bought this for my daily commute. Tea goes cold way too fast on my commute.,False,- Drink goes cold within an hour,,,,
+31,1.0,"We got this for our 6 year old. It eats batteries, my son plays for half an hour and it is dead.",False,- Batteries run out after a short play time,,,,
+28,2.0,Arrived two weeks late and the box was crushed. Very annoying experience overall.,True,,,,,
+17,2.0,I work from home and use it all day. The cable is too short to reach the outlet. I had to buy an extension cord.,False,- Power cable is too short,,,,
+13,1.0,I use it every morning on the train. The lid leaks every time it tips over in my bag. Now I keep it inside a plastic bag.,False,- Lid leaks when the mug tips over in a bag,,,,
+86,2.0,I work from home and use it all day. Even at max it is too dim for my work.,False,- Light is not bright enough for work,,,,

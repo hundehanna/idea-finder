@@ -1,0 +1,195 @@
+{
+  "0": {
+    "name": "Mug does not fit car cup holders",
+    "underlying_need": "People need a product where this does not happen: mug does not fit car cup holders.",
+    "who_and_when": "People who wrote these reviews",
+    "current_workarounds": [
+      "Uses a block of wood as a spacer",
+      "Wedges it in with a towel"
+    ],
+    "why_products_fail": "Current products are not designed for this situation.",
+    "product_directions": [
+      "Redesign so that this is fixed: mug does not fit car cup holders",
+      "Test a prototype with real users"
+    ],
+    "opportunity_type": "design_gap",
+    "_sig": "61b59ff8f243"
+  },
+  "1": {
+    "name": "Lid leaks when the mug tips over in",
+    "underlying_need": "People need a product where this does not happen: lid leaks when the mug tips over in a bag.",
+    "who_and_when": "People who wrote these reviews",
+    "current_workarounds": [
+      "Keeps the mug inside a plastic bag"
+    ],
+    "why_products_fail": "Current products are not designed for this situation.",
+    "product_directions": [
+      "Redesign so that this is fixed: lid leaks when the mug tips over in a bag",
+      "Test a prototype with real users"
+    ],
+    "opportunity_type": "design_gap",
+    "_sig": "69134f650609"
+  },
+  "2": {
+    "name": "Batteries run out after a short play time",
+    "underlying_need": "People need a product where this does not happen: batteries run out after a short play time.",
+    "who_and_when": "People who wrote these reviews",
+    "current_workarounds": [
+      "Buys rechargeable batteries in bulk"
+    ],
+    "why_products_fail": "Current products are not designed for this situation.",
+    "product_directions": [
+      "Redesign so that this is fixed: batteries run out after a short play time",
+      "Test a prototype with real users"
+    ],
+    "opportunity_type": "design_gap",
+    "_sig": "0d1ac0ddc272"
+  },
+  "3": {
+    "name": "Drink goes cold within an hour",
+    "underlying_need": "People need a product where this does not happen: drink goes cold within an hour.",
+    "who_and_when": "People who wrote these reviews",
+    "current_workarounds": [],
+    "why_products_fail": "Current products are not designed for this situation.",
+    "product_directions": [
+      "Redesign so that this is fixed: drink goes cold within an hour",
+      "Test a prototype with real users"
+    ],
+    "opportunity_type": "design_gap",
+    "_sig": "08dd165d10ac"
+  },
+  "4": {
+    "name": "Light is not bright enough for work",
+    "underlying_need": "People need a product where this does not happen: light is not bright enough for work.",
+    "who_and_when": "People who wrote these reviews",
+    "current_workarounds": [],
+    "why_products_fail": "Current products are not designed for this situation.",
+    "product_directions": [
+      "Redesign so that this is fixed: light is not bright enough for work",
+      "Test a prototype with real users"
+    ],
+    "opportunity_type": "design_gap",
+    "_sig": "7335271a3ebd"
+  },
+  "5": {
+    "name": "Mug is not dishwasher safe",
+    "underlying_need": "People need a product where this does not happen: mug is not dishwasher safe.",
+    "who_and_when": "People who wrote these reviews",
+    "current_workarounds": [],
+    "why_products_fail": "Current products are not designed for this situation.",
+    "product_directions": [
+      "Redesign so that this is fixed: mug is not dishwasher safe",
+      "Test a prototype with real users"
+    ],
+    "opportunity_type": "design_gap",
+    "_sig": "25ec825d6447"
+  },
+  "8": {
+    "name": "Companion app will not connect to the robot",
+    "underlying_need": "People need a product where this does not happen: companion app will not connect to the robot.",
+    "who_and_when": "People who wrote these reviews",
+    "current_workarounds": [],
+    "why_products_fail": "Current products are not designed for this situation.",
+    "product_directions": [
+      "Redesign so that this is fixed: companion app will not connect to the robot",
+      "Test a prototype with real users"
+    ],
+    "opportunity_type": "design_gap",
+    "_sig": "40a32282ada1"
+  },
+  "7": {
+    "name": "Arms and legs snap off easily",
+    "underlying_need": "People need a product where this does not happen: arms and legs snap off easily.",
+    "who_and_when": "People who wrote these reviews",
+    "current_workarounds": [],
+    "why_products_fail": "Current products are not designed for this situation.",
+    "product_directions": [
+      "Redesign so that this is fixed: arms and legs snap off easily",
+      "Test a prototype with real users"
+    ],
+    "opportunity_type": "quality_defect",
+    "_sig": "9bf4fd6c4d7d"
+  },
+  "6": {
+    "name": "Robot is too loud for quiet times",
+    "underlying_need": "People need a product where this does not happen: robot is too loud for quiet times.",
+    "who_and_when": "People who wrote these reviews",
+    "current_workarounds": [
+      "Puts tape over the speaker"
+    ],
+    "why_products_fail": "Current products are not designed for this situation.",
+    "product_directions": [
+      "Redesign so that this is fixed: robot is too loud for quiet times",
+      "Test a prototype with real users"
+    ],
+    "opportunity_type": "design_gap",
+    "_sig": "f2c0c8702d2c"
+  },
+  "9": {
+    "name": "Light flickers",
+    "underlying_need": "People need a product where this does not happen: light flickers.",
+    "who_and_when": "People who wrote these reviews",
+    "current_workarounds": [],
+    "why_products_fail": "Current products are not designed for this situation.",
+    "product_directions": [
+      "Redesign so that this is fixed: light flickers",
+      "Test a prototype with real users"
+    ],
+    "opportunity_type": "design_gap",
+    "_sig": "b2e5c618caca"
+  },
+  "10": {
+    "name": "Mug keeps a smell after washing",
+    "underlying_need": "People need a product where this does not happen: mug keeps a smell after washing.",
+    "who_and_when": "People who wrote these reviews",
+    "current_workarounds": [],
+    "why_products_fail": "Current products are not designed for this situation.",
+    "product_directions": [
+      "Redesign so that this is fixed: mug keeps a smell after washing",
+      "Test a prototype with real users"
+    ],
+    "opportunity_type": "design_gap",
+    "_sig": "859798723430"
+  },
+  "11": {
+    "name": "Instructions are hard to follow",
+    "underlying_need": "People need a product where this does not happen: instructions are hard to follow.",
+    "who_and_when": "People who wrote these reviews",
+    "current_workarounds": [],
+    "why_products_fail": "Current products are not designed for this situation.",
+    "product_directions": [
+      "Redesign so that this is fixed: instructions are hard to follow",
+      "Test a prototype with real users"
+    ],
+    "opportunity_type": "design_gap",
+    "_sig": "2ddebb44a70a"
+  },
+  "13": {
+    "name": "Lamp head gets too hot",
+    "underlying_need": "People need a product where this does not happen: lamp head gets too hot.",
+    "who_and_when": "People who wrote these reviews",
+    "current_workarounds": [],
+    "why_products_fail": "Current products are not designed for this situation.",
+    "product_directions": [
+      "Redesign so that this is fixed: lamp head gets too hot",
+      "Test a prototype with real users"
+    ],
+    "opportunity_type": "design_gap",
+    "_sig": "c3b25b16c346"
+  },
+  "12": {
+    "name": "Power cable is too short",
+    "underlying_need": "People need a product where this does not happen: power cable is too short.",
+    "who_and_when": "People who wrote these reviews",
+    "current_workarounds": [
+      "Bought an extension cord"
+    ],
+    "why_products_fail": "Current products are not designed for this situation.",
+    "product_directions": [
+      "Redesign so that this is fixed: power cable is too short",
+      "Test a prototype with real users"
+    ],
+    "opportunity_type": "design_gap",
+    "_sig": "615ac0387fb3"
+  }
+}
